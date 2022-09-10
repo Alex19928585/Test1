@@ -25,9 +25,16 @@ class Block(pygame.sprite.Sprite):
         self.ky = 1
         self.valid = False
         self.rect.center = (rect_x, rect_y)
+        self.x = 0
 
     def move(self):
         self.rect.y -= self.speed * self.kx
+        print(self.rect.bottom, self.rect.center[1])
+        if self.rect.bottom == 658:
+            self.speed = 0
+        if self.rect.bottom > HEIGHT:
+            self.x = self.rect.center[0]
+            self.rect.center = (self.x, 620)
 
 
 # Создание фигуры
@@ -37,6 +44,7 @@ all_sprites.add(b1)
 running = True
 while running:
     clock.tick(FPS)
+    screen.fill(pygame.Color('black'))
     for event in pygame.event.get():
         # check for closing window
         if event.type == pygame.QUIT:
@@ -48,8 +56,10 @@ while running:
     # Клавиатура
     pressed_keys = pygame.key.get_pressed()
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]:
-        pass
+    if keys[pygame.K_RIGHT]:
+        b1.rect.x += b1.speed
+    elif keys[pygame.K_LEFT]:
+        b1.rect.x -= b1.speed
 
     all_sprites.draw(screen)
     pygame.display.flip()
