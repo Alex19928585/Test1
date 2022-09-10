@@ -1,6 +1,5 @@
 import pygame
 from settings import *
-from figure import figure
 import time
 import random
 
@@ -11,46 +10,29 @@ pygame.mixer.init()
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 
-screen = pygame.display.set_mode((WIDTH-320, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
 class Block(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, col, rect_x, rect_y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((30, 30))
-        self.image.fill(pygame.Color('gold'))
+        self.image = pygame.Surface((60, 60))
+        self.image.fill(pygame.Color(col))
         self.rect = self.image.get_rect()
-        self.image1 = pygame.Surface((30, 30))
-        self.image1.fill(pygame.Color('gold'))
-        self.rect1 = self.image1.get_rect()
 
         self.speed = 8
         self.kx = -1
         self.ky = 1
         self.valid = False
-        self.rect.center = (300, 300)
-        self.rect1.center = (400, 400)
+        self.rect.center = (rect_x, rect_y)
 
-    def update(self):
-        # self.rect.y += self.speed * self.kx
-        pass
+    def move(self):
+        self.rect.y -= self.speed * self.kx
 
-
-lst_figure = figure()
-lst_figure_full = []
 
 # Создание фигуры
-
-
-
-for i in range(len(lst_figure)):
-    print(lst_figure[i])
-
-
-
-b1 = Block()
+b1 = Block('gold', 300, 50)
 all_sprites.add(b1)
-
 
 running = True
 while running:
@@ -60,15 +42,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    all_sprites.update()
+    Block.move(b1)
+
 
     # Клавиатура
     pressed_keys = pygame.key.get_pressed()
     keys = pygame.key.get_pressed()
     if keys[pygame.K_UP]:
         pass
-
-
 
     all_sprites.draw(screen)
     pygame.display.flip()
