@@ -1,7 +1,7 @@
 import pygame
 from settings import *
 import time
-import random
+from Block_file import Block
 
 pygame.font.init()
 pygame.init()
@@ -12,54 +12,15 @@ all_sprites = pygame.sprite.Group()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-
-class Block(pygame.sprite.Sprite):
-    def __init__(self, col, rect_x, rect_y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((58, 58))
-        self.image.fill(pygame.Color(col))
-        self.rect = self.image.get_rect()
-
-        self.speed = 5
-        self.kx = -1
-        self.ky = 1
-        self.rect.center = (rect_x, rect_y)
-        self.x = 0
-        self.y = 0
-        self.live = False
-
-    def move(self):
-        self.rect.y -= self.speed * self.kx
-        # print(self.rect.bottom, self.rect.center[0])
-        if self.rect.bottom > HEIGHT:
-            self.x = self.rect.center[0]
-            self.rect.center = (self.x, 690)
-        if self.rect.center[1] == 690:
-            self.live = False
-            self.speed = 0
-        if self.rect.right > WIDTH:
-            self.x = self.rect.center[0]
-            self.y = self.rect.center[1]
-            self.rect.center = (self.x-60, self.y)
-        # if self.rect.bottom > 655:
-        #     self.rect.center = (200, 200)
-
-
-
+# region Переменные и размер сети
 grid = [pygame.Rect(x * 60, y * 60, 60, 60) for x in range(10) for y in range(20)]
 lst_block = []
 lst_full_line = []
 valid_right = 0
 valid_left = 0
 result = []
-
-# def create_object():
-#
-#     b1 = Block('gold', 270, 50)
-#     all_sprites.add(b1)
-#     return b1
-
 valid = False
+# endregion
 
 running = True
 while running:
@@ -70,40 +31,34 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-
+    # Отрисока сетки
     [pygame.draw.rect(screen, (40, 40, 40), i_rect, 1) for i_rect in grid]
 
-    # if kol == 0 or b1.live != True:
-    #     b1 = create_object()
-    #     kol = 1
-
-
+    # region Создание блока, live присваивается к объекту true(если у последнего оюъекта live == false)
     if len(lst_block) == 0:
         if valid == False:
             lst_block.append(Block('gold', 270, 50))
             lst_block[-1].live = True
-
     elif lst_block[-1].live == False:
         lst_block.append(Block('gold', 270, 50))
         lst_block[-1].live = True
 
+    # отрисока блоков и если хоть один блок live == true --> двигать
     for i in lst_block:
         all_sprites.add(i)
         # print(i.live)
     for i in lst_block:
         if i.live == True:
             i.move()
+    # endregion
 
-
+    # region Проверка на столкновение блоков
+    # Проверка соприкосновений активного блока с неактивными и при столкновении live последнего блока == false
     for k in lst_block:
         if k != lst_block[-1]:
             x = lst_block[-1].rect.center[0]
             if lst_block[-1].rect.center[1] + 60 == k.rect.center[1] and lst_block[-1].rect.center[0] == k.rect.center[0]:
                 lst_block[-1].live = False
-
-    # Клавиатура
-    pressed_keys = pygame.key.get_pressed()
-    keys = pygame.key.get_pressed()
 
     # Проверка на блок справа
     for i in lst_block:
@@ -114,6 +69,7 @@ while running:
                 break
             else:
                 valid_right = False
+
     # Проверка на блок справа
     for i in lst_block:
         if i != lst_block[-1]:
@@ -123,6 +79,11 @@ while running:
                 break
             else:
                 valid_left = False
+    # endregion
+
+    # region Клавиатура
+    pressed_keys = pygame.key.get_pressed()
+    keys = pygame.key.get_pressed()
 
     if keys[pygame.K_RIGHT] and lst_block[-1].rect.center[0] != 510 and valid_right == False:
         y = lst_block[-1].rect.center[1]
@@ -136,9 +97,10 @@ while running:
         time.sleep(0.1)
     elif len(lst_block) == 1 and keys[pygame.K_DOWN]:
         lst_block[-1].speed = 10
+    # endregion
 
+    # region Ускорение
     elif keys[pygame.K_DOWN]:
-
         for i in range(len(lst_block)):
             if i != len(lst_block)-1:
                 if lst_block[i].rect.center[0] == lst_block[-1].rect.center[0] and lst_block[i].rect.center[1]-90 < lst_block[-1].rect.center[1]:
@@ -148,8 +110,9 @@ while running:
                     lst_block[-1].speed = 10
     else:
         lst_block[-1].speed = 5
+    # endregion
 
-    # Удаление ряда
+    # region Удаление ряда
 
     for i in lst_block:
         if i.rect.center[1] == 690:
@@ -175,6 +138,7 @@ while running:
         lst_full_line = []
     else:
         lst_full_line = []
+    # endregion
 
     all_sprites.draw(screen)
     pygame.display.flip()
